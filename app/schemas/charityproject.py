@@ -1,6 +1,8 @@
-from datetime import datetime
 from typing import Optional
+
 from pydantic import BaseModel
+
+from app.schemas.abstract import TimeAndCashModel
 
 
 class CharityProjectCreate(BaseModel):
@@ -11,13 +13,10 @@ class CharityProjectCreate(BaseModel):
     full_amount: int
 
 
-class CharityProjectDB(CharityProjectCreate):
+class CharityProjectDB(CharityProjectCreate, TimeAndCashModel):
     """Модель Pydantic для получения целевых проектов."""
 
-    invested_amount: int
-    fully_invested: bool
-    create_date: datetime
-    close_Date: datetime
+    pass
 
 
 class CharityProjectUpdate(BaseModel):
