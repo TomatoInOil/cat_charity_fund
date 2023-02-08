@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel
 
 from app.schemas.abstract import TimeAndCashModel
@@ -6,7 +8,7 @@ from app.schemas.abstract import TimeAndCashModel
 class DonationCreate(BaseModel):
     """Модель Pydantic для создания пожертвования."""
 
-    comment: str
+    comment: Optional[str]
     full_amount: int
 
 
