@@ -5,7 +5,7 @@ class Settings(BaseSettings):
     """Настройки проекта QRKot."""
 
     app_title: str = "Благотворительный фонд поддержки котиков QRKot"
-    description: str = (
+    app_description: str = (
         "Фонд собирает пожертвования на различные целевые "
         "проекты, направленные на помощь хвостатым."
     )
