@@ -10,6 +10,7 @@ class Settings(BaseSettings):
         "проекты, направленные на помощь хвостатым."
     )
     database_url: str = "sqlite+aiosqlite:///./fastapi.db"
+    secret: str = "SECRET"
 
     class Config:
         env_file = ".env"
