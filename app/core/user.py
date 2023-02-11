@@ -46,6 +46,10 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
         password: str,
         user: Union[UserCreate, User],
     ) -> None:
+        if len(password) < 3:
+            raise InvalidPasswordException(
+                reason="Password should be at least 3 characters"
+            )
         if user.email in password:
             raise InvalidPasswordException(
                 reason="Пароль не должен содержать e-mail"

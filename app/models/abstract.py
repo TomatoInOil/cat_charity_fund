@@ -1,5 +1,6 @@
+from datetime import datetime
+
 from sqlalchemy import Boolean, CheckConstraint, Column, DateTime, Integer
-from sqlalchemy.sql import func
 
 from app.core.db import Base
 
@@ -8,7 +9,7 @@ class TimeColumnsModel(Base):
     """Абстрактная модель SQLAlchemy с полями времени."""
 
     __abstract__ = True
-    create_date = Column(DateTime, default=func.now())
+    create_date = Column(DateTime, default=datetime.now)
     close_date = Column(DateTime)
 
 

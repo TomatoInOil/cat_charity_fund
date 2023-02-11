@@ -15,4 +15,5 @@ class DonationCreate(BaseModel):
 class DonationtDB(DonationCreate, TimeAndCashModel):
     """Модель Pydantic для получения информации о пожертвовании."""
 
-    pass
+    class Config:
+        orm_mode = True
