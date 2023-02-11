@@ -1,11 +1,16 @@
-from http import HTTPStatus
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.validators import (
+    check_invested_amount_before_delete,
+    check_project_data_before_update,
+    check_project_name_exists,
+    get_charity_project_or_404,
+)
 from app.core.db import get_async_session
 from app.core.user import current_superuser
 from app.models import CharityProject
@@ -47,11 +52,6 @@ async def create_charity_project(
     """
     obj_in_data = obj_in.dict()
     await check_project_name_exists(name=obj_in_data["name"], session=session)
-    if obj_in_data["full_amount"] <= 0:
-        raise HTTPException(
-            status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
-            detail="Требуемая сумма должна быть целочисленной и больше 0",
-        )
     db_obj = CharityProject(**obj_in_data)
     session.add(db_obj)
     await session.commit()
@@ -72,18 +72,10 @@ async def delete_charity_project(
     инвестированы средства, его можно только закрыть.
     Только для суперюзеров.
     """
-    db_obj = await session.execute(
-        select(CharityProject).where(CharityProject.id == project_id)
+    db_obj = await get_charity_project_or_404(
+        project_id=project_id, session=session
     )
-    db_obj = db_obj.scalars().first()
-    if db_obj.invested_amount != 0:
-        raise HTTPException(
-            status_code=HTTPStatus.BAD_REQUEST,
-            detail=(
-                "Нельзя удалить проект, в который "
-                "уже были инвестированы средства."
-            ),
-        )
+    check_invested_amount_before_delete(db_obj)
     await session.delete(db_obj)
     await session.commit()
     return db_obj
@@ -104,32 +96,12 @@ async def update_charity_project(
     требуемую сумму меньше уже вложенной.
     Только для суперюзеров.
     """
-    db_obj = await session.execute(
-        select(CharityProject).where(CharityProject.id == project_id)
+    db_obj = await get_charity_project_or_404(
+        project_id=project_id, session=session
     )
-    db_obj = db_obj.scalars().first()
-    if db_obj is None:
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail=f"Благотворительный проект с {project_id} не найден",
-        )
-    if db_obj.fully_invested is True:
-        raise HTTPException(
-            status_code=HTTPStatus.BAD_REQUEST,
-            detail="Закрытый проект нельзя редактировать!",
-        )
     db_obj_data = jsonable_encoder(db_obj)
     obj_in_data = obj_in.dict(exclude_unset=True)
-    new_name = obj_in_data.get("name")
-    if new_name is not None:
-        await check_project_name_exists(name=new_name, session=session)
-    full_amount = obj_in_data.get("full_amount")
-    if full_amount is not None:
-        if obj_in_data.get("full_amount") < db_obj.invested_amount:
-            raise HTTPException(
-                status_code=HTTPStatus.BAD_REQUEST,
-                detail="Нельзя установить требуемую сумму меньше уже вложенной",
-            )
+    await check_project_data_before_update(db_obj_data, obj_in_data, session)
     for field in db_obj_data:
         if field in obj_in_data:
             setattr(db_obj, field, obj_in_data[field])
@@ -137,16 +109,3 @@ async def update_charity_project(
     await session.commit()
     await session.refresh(db_obj)
     return db_obj
-
-
-async def check_project_name_exists(name: str, session: AsyncSession):
-    """Вызывает исключение, если проект с таким именем уже существует."""
-    project_found_by_name = await session.execute(
-        select(CharityProject).where(CharityProject.name == name)
-    )
-    project_found_by_name = project_found_by_name.first()
-    if project_found_by_name is not None:
-        raise HTTPException(
-            status_code=HTTPStatus.BAD_REQUEST,
-            detail="Проект с таким именем уже существует!",
-        )
