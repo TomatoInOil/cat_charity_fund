@@ -5,6 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import CharityProject
+from app.schemas.charity_project import CharityProjectUpdate
 
 
 async def check_project_name_exists(name: str, session: AsyncSession):
@@ -32,41 +33,27 @@ def check_invested_amount_before_delete(db_obj: CharityProject):
         )
 
 
-async def get_charity_project_or_404(project_id: int, session: AsyncSession):
-    """Возвращает объект целевого проекта из БД или вызывает ошибку 404."""
-    db_obj = await session.execute(
-        select(CharityProject).where(CharityProject.id == project_id)
-    )
-    db_obj = db_obj.scalars().first()
-    if db_obj is None:
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail=f"Благотворительный проект с {project_id} не найден",
-        )
-    return db_obj
-
-
 async def check_project_data_before_update(
-    db_obj_data: dict, obj_in_data: dict, session: AsyncSession
+    db_obj: CharityProject, obj_in: CharityProjectUpdate, session: AsyncSession
 ):
     """
     Валидация перед изменением проекта.
     Вызывает исключение, если проект закрыт, если имя неуникально,
     если требуемая сумма меньше вложенной.
     """
-    if db_obj_data["fully_invested"] is True:
+    if db_obj.fully_invested is True:
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
             detail="Закрытый проект нельзя редактировать!",
         )
 
-    new_name = obj_in_data.get("name")
+    new_name = obj_in.name
     if new_name is not None:
         await check_project_name_exists(name=new_name, session=session)
 
-    full_amount = obj_in_data.get("full_amount")
-    if full_amount is not None:
-        if obj_in_data.get("full_amount") < db_obj_data["invested_amount"]:
+    new_full_amount = obj_in.full_amount
+    if new_full_amount is not None:
+        if new_full_amount < db_obj.invested_amount:
             raise HTTPException(
                 status_code=HTTPStatus.BAD_REQUEST,
                 detail="Нельзя установить требуемую сумму меньше уже вложенной",

@@ -1,19 +1,16 @@
 from typing import List
 
 from fastapi import APIRouter, Depends
-from fastapi.encoders import jsonable_encoder
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.validators import (
     check_invested_amount_before_delete,
     check_project_data_before_update,
     check_project_name_exists,
-    get_charity_project_or_404,
 )
 from app.core.db import get_async_session
 from app.core.user import current_superuser
-from app.models import CharityProject
+from app.crud import charity_project_crud
 from app.schemas.charity_project import (
     CharityProjectCreate,
     CharityProjectDB,
@@ -32,8 +29,7 @@ async def get_all_charity_projects(
     session: AsyncSession = Depends(get_async_session),
 ):
     """Возвращает список всех проектов."""
-    all_projects = await session.execute(select(CharityProject))
-    return all_projects.scalars().all()
+    return await charity_project_crud.get_all(session=session)
 
 
 @router.post(
@@ -50,13 +46,9 @@ async def create_charity_project(
     Создаёт благотворительный проект.
     Только для суперюзеров.
     """
-    obj_in_data = obj_in.dict()
-    await check_project_name_exists(name=obj_in_data["name"], session=session)
-    db_obj = CharityProject(**obj_in_data)
-    session.add(db_obj)
-    await session.commit()
-    await session.refresh(db_obj)
-    return db_obj
+    await check_project_name_exists(name=obj_in.name, session=session)
+    project = await charity_project_crud.create(obj_in=obj_in, session=session)
+    return project
 
 
 @router.delete(
@@ -72,13 +64,12 @@ async def delete_charity_project(
     инвестированы средства, его можно только закрыть.
     Только для суперюзеров.
     """
-    db_obj = await get_charity_project_or_404(
-        project_id=project_id, session=session
+    project = await charity_project_crud.get_or_404(
+        obj_id=project_id, session=session
     )
-    check_invested_amount_before_delete(db_obj)
-    await session.delete(db_obj)
-    await session.commit()
-    return db_obj
+    check_invested_amount_before_delete(project)
+    await charity_project_crud.delete(db_obj=project, session=session)
+    return project
 
 
 @router.patch(
@@ -96,16 +87,13 @@ async def update_charity_project(
     требуемую сумму меньше уже вложенной.
     Только для суперюзеров.
     """
-    db_obj = await get_charity_project_or_404(
-        project_id=project_id, session=session
+    project = await charity_project_crud.get_or_404(
+        obj_id=project_id, session=session
     )
-    db_obj_data = jsonable_encoder(db_obj)
-    obj_in_data = obj_in.dict(exclude_unset=True)
-    await check_project_data_before_update(db_obj_data, obj_in_data, session)
-    for field in db_obj_data:
-        if field in obj_in_data:
-            setattr(db_obj, field, obj_in_data[field])
-    session.add(db_obj)
-    await session.commit()
-    await session.refresh(db_obj)
-    return db_obj
+    await check_project_data_before_update(
+        db_obj=project, obj_in=obj_in, session=session
+    )
+    project = await charity_project_crud.update(
+        db_obj=project, obj_in=obj_in, session=session
+    )
+    return project
