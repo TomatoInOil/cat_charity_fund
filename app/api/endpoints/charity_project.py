@@ -9,7 +9,7 @@ from app.api.validators import (
     check_project_data_before_update,
     check_project_name_exists,
 )
-from app.services.charity_project import invest_open_donations_in_project
+from app.services.investment import invest_open_donations_in_project
 from app.core.db import get_async_session
 from app.core.user import current_superuser
 from app.crud import charity_project_crud

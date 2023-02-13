@@ -12,7 +12,7 @@ from app.schemas.donation import (
     DonationtDB,
     ExtendedDonationtDB,
 )
-from app.services.donation import invest_donation_in_open_projects
+from app.services.investment import invest_donation_in_open_projects
 from app.api.validators import check_donation_amount_is_positive
 
 router = APIRouter()
