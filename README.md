@@ -1,15 +1,15 @@
 # *API* для благотворительного фонда *QRKot*
 ## Оглавление
-1. [Описание](https://github.com/TomatoInOil/cat_charity_fund/README.md#описание)
-2. [Технологии](https://github.com/TomatoInOil/cat_charity_fund/README.md#технологии)
-3. [Установка](https://github.com/TomatoInOil/cat_charity_fund/README.md#установка)
-4. [Примеры запросов](https://github.com/TomatoInOil/cat_charity_fund/README.md#примеры-запросов)
-    1. [Благотворительные проекты](https://github.com/TomatoInOil/cat_charity_fund/README.md#благотворительные-проекты)
-    2. [Пожертвования](https://github.com/TomatoInOil/cat_charity_fund/README.md#пожертвования)
-    3. [Пользователи](https://github.com/TomatoInOil/cat_charity_fund/README.md#пользователи)
-5. [Автор](https://github.com/TomatoInOil/cat_charity_fund/README.md#автор)
+1. [Описание](https://github.com/TomatoInOil/cat_charity_fund#описание)
+2. [Технологии](https://github.com/TomatoInOil/cat_charity_fund#технологии)
+3. [Установка](https://github.com/TomatoInOil/cat_charity_fund#установка)
+4. [Примеры запросов](https://github.com/TomatoInOil/cat_charity_fund#примеры-запросов)
+    1. [Благотворительные проекты](https://github.com/TomatoInOil/cat_charity_fund#благотворительные-проекты)
+    2. [Пожертвования](https://github.com/TomatoInOil/cat_charity_fund#пожертвования)
+    3. [Пользователи](https://github.com/TomatoInOil/cat_charity_fund#пользователи)
+5. [Автор](https://github.com/TomatoInOil/cat_charity_fund#автор)
 ## Описание
-Фонд собирает пожертвования на различные целевые проекты. С помощью *API* можно создавать целевые проекты с названием, описанием и целевой суммой. Пожертвования направляются в первый открытый проект и когда он закрывается, переходят к следующему по принципу `First In, First Out`. Перейти к [примерам запросов](https://github.com/TomatoInOil/cat_charity_fund/README.md#примеры-запросов).
+Фонд собирает пожертвования на различные целевые проекты. С помощью *API* можно создавать целевые проекты с названием, описанием и целевой суммой. Пожертвования направляются в первый открытый проект и когда он закрывается, переходят к следующему по принципу `First In, First Out`. Перейти к [примерам запросов](https://github.com/TomatoInOil/cat_charity_fund#примеры-запросов).
 ## Технологии
 - `Python 3.7.9`
 - `FastAPI`
