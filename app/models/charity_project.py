@@ -1,6 +1,6 @@
 from sqlalchemy import Column, String, Text
 
-from app.models.abstract import TimeColumnsModel, CashColumnsModel
+from app.models.abstract import CashColumnsModel, TimeColumnsModel
 
 
 class CharityProject(TimeColumnsModel, CashColumnsModel):

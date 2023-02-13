@@ -142,3 +142,6 @@ dmypy.json
 
 .vscode/
 *.code-workspace
+
+# БД
+*.db

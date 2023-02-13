@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import List
 
 from fastapi import APIRouter, Depends
@@ -9,7 +8,6 @@ from app.api.validators import (
     check_project_data_before_update,
     check_project_name_exists,
 )
-from app.services.investment import invest_open_donations_in_project
 from app.core.db import get_async_session
 from app.core.user import current_superuser
 from app.crud import charity_project_crud
@@ -17,6 +15,10 @@ from app.schemas.charity_project import (
     CharityProjectCreate,
     CharityProjectDB,
     CharityProjectUpdate,
+)
+from app.services.investment import (
+    check_and_close_fully_invested_object,
+    invest_open_donations_in_project,
 )
 
 router = APIRouter()
@@ -98,9 +100,7 @@ async def update_charity_project(
     await check_project_data_before_update(
         db_obj=project, obj_in=obj_in, session=session
     )
-    if project.invested_amount == obj_in.full_amount:
-        project.fully_invested = True
-        project.close_date = datetime.now()
+    project = check_and_close_fully_invested_object(db_obj=project)
     project = await charity_project_crud.update(
         db_obj=project, obj_in=obj_in, session=session
     )

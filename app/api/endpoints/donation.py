@@ -3,6 +3,7 @@ from typing import List
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.validators import check_donation_amount_is_positive
 from app.core.db import get_async_session
 from app.core.user import current_superuser, current_user
 from app.crud import donation_crud
@@ -13,7 +14,6 @@ from app.schemas.donation import (
     ExtendedDonationtDB,
 )
 from app.services.investment import invest_donation_in_open_projects
-from app.api.validators import check_donation_amount_is_positive
 
 router = APIRouter()
 
@@ -49,7 +49,9 @@ async def create_donation(
     donation = await donation_crud.create(
         obj_in=obj_in, session=session, user_id=user.id
     )
-    donation = await invest_donation_in_open_projects(donation=donation, session=session)
+    donation = await invest_donation_in_open_projects(
+        donation=donation, session=session
+    )
     return donation
 
 

@@ -28,11 +28,11 @@ async def invest_open_donations_in_project(
         ) = _allocate_amounts(
             remaining_amount, unallocated_amount, project, oldest_open_donation
         )
-        oldest_open_donation = _check_and_close_fully_invested_object(
+        oldest_open_donation = check_and_close_fully_invested_object(
             db_obj=oldest_open_donation
         )
         session.add(oldest_open_donation)
-        project = _check_and_close_fully_invested_object(db_obj=project)
+        project = check_and_close_fully_invested_object(db_obj=project)
         if remaining_amount == 0:
             break
     session.add(project)
@@ -62,17 +62,30 @@ async def invest_donation_in_open_projects(
         ) = _allocate_amounts(
             remaining_amount, unallocated_amount, oldest_open_project, donation
         )
-        oldest_open_project = _check_and_close_fully_invested_object(
+        oldest_open_project = check_and_close_fully_invested_object(
             db_obj=oldest_open_project
         )
         session.add(oldest_open_project)
         if unallocated_amount == 0:
             break
-    donation = _check_and_close_fully_invested_object(db_obj=donation)
+    donation = check_and_close_fully_invested_object(db_obj=donation)
     session.add(donation)
     await session.commit()
     await session.refresh(donation)
     return donation
+
+
+def check_and_close_fully_invested_object(
+    db_obj: Union[Donation, CharityProject]
+) -> Union[Donation, CharityProject]:
+    """
+    Проверяет, что объект полностью инвестирован.
+    Если утверждение верно, то закрывает его.
+    """
+    if db_obj.invested_amount == db_obj.full_amount:
+        db_obj.fully_invested = True
+        db_obj.close_date = datetime.now()
+    return db_obj
 
 
 async def _get_investable_objects_from_db(
@@ -86,19 +99,6 @@ async def _get_investable_objects_from_db(
     )
     db_objs = db_objs.scalars().all()
     return db_objs
-
-
-def _check_and_close_fully_invested_object(
-    db_obj: Union[Donation, CharityProject]
-) -> Union[Donation, CharityProject]:
-    """
-    Проверяет, что объект полностью инвестирован.
-    Если утверждение верно, то закрывает его.
-    """
-    if db_obj.invested_amount == db_obj.full_amount:
-        db_obj.fully_invested = True
-        db_obj.close_date = datetime.now()
-    return db_obj
 
 
 def _allocate_amounts(
