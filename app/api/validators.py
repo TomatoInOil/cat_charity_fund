@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import CharityProject
 from app.schemas.charity_project import CharityProjectUpdate
+from app.schemas.donation import DonationCreate
 
 
 async def check_project_name_exists(name: str, session: AsyncSession):
@@ -26,10 +27,7 @@ def check_invested_amount_before_delete(db_obj: CharityProject):
     if db_obj.invested_amount != 0:
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
-            detail=(
-                "Нельзя удалить проект, в который "
-                "уже были инвестированы средства."
-            ),
+            detail="В проект были внесены средства, не подлежит удалению!",
         )
 
 
@@ -58,3 +56,12 @@ async def check_project_data_before_update(
                 status_code=HTTPStatus.BAD_REQUEST,
                 detail="Нельзя установить требуемую сумму меньше уже вложенной",
             )
+
+
+def check_donation_amount_is_positive(obj_in: DonationCreate):
+    """Вызывает исключение, если сумма пожертвований неположительна."""
+    if obj_in.full_amount <= 0:
+        raise HTTPException(
+            status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
+            detail="Сумма пожертвования должна быть целой и положительной!",
+        )

@@ -11,7 +11,7 @@ class DonationCRUD(BaseCRUD):
     async def get_by_user(self, user_id: int, session: AsyncSession):
         """Получение объектов из БД, созданных пользователем."""
         db_objs = await session.execute(
-            select(self.model).where(user_id=user_id)
+            select(self.model).where(self.model.user_id == user_id)
         )
         return db_objs.scalars().all()
 

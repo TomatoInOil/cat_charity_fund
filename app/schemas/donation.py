@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 
 from pydantic import BaseModel
@@ -12,8 +13,17 @@ class DonationCreate(BaseModel):
     full_amount: int
 
 
-class DonationtDB(DonationCreate, TimeAndCashModel):
+class DonationtDB(DonationCreate):
     """Модель Pydantic для получения информации о пожертвовании."""
+
+    id: int
+    create_date: datetime
 
     class Config:
         orm_mode = True
+
+
+class ExtendedDonationtDB(DonationtDB, TimeAndCashModel):
+    """Модель Pydantic для получшения всей информации о пожертвовании."""
+
+    user_id: int
