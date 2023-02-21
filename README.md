@@ -7,6 +7,7 @@
     1. [Благотворительные проекты](https://github.com/TomatoInOil/cat_charity_fund#благотворительные-проекты)
     2. [Пожертвования](https://github.com/TomatoInOil/cat_charity_fund#пожертвования)
     3. [Пользователи](https://github.com/TomatoInOil/cat_charity_fund#пользователи)
+    4. [Google Api](https://github.com/TomatoInOil/cat_charity_fund#google-api)
 5. [Автор](https://github.com/TomatoInOil/cat_charity_fund#автор)
 ## Описание
 Фонд собирает пожертвования на различные целевые проекты. С помощью *API* можно создавать целевые проекты с названием, описанием и целевой суммой. Пожертвования направляются в первый открытый проект и когда он закрывается, переходят к следующему по принципу `First In, First Out`. Перейти к [примерам запросов](https://github.com/TomatoInOil/cat_charity_fund#примеры-запросов).
@@ -17,6 +18,7 @@
 - `SQLAlchemy`
 - `Pydantic`
 - `Asyncio`
+- `Google Api`
 ## Установка
 1. Клонируйте проект 
 ```BASH
@@ -82,5 +84,14 @@ POST-запрос .../donation/
 ```
 ### Пользователи
 Эндпоинты для авторизации и управления пользователями реализованы на `fastapi-users`.
+### Google Api
+Если задать в `.env` учётные данные сервис-аккаунта ***Google Cloud Platform***, а также почту администратора, то можно будет формировать отчёты в ***Google Sheets***, к которым будет иметь доступ администратор в ***Google Drive***.  
+
+GET-запрос .../google  
+
+Ответ (200):
+```JSON
+"https://docs.google.com/spreadsheets/d/spreadsheet_id"
+```
 ## Автор
 Проект выполнен в рамках прохождения курса Яндекс.Практикума Даниилом Паутовым.
