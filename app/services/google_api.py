@@ -9,6 +9,25 @@ FORMAT = "%Y/%m/%d %H:%M:%S"
 REPORT_ROW_COUNT = 100
 REPORT_COLUMN_COUNT = 10
 SPREADSHEET_URL = "https://docs.google.com/spreadsheets/d/%s"
+SPREADSHEET_BODY = {
+    "properties": {
+        "title": "QRKot. Отчет от %s",
+        "locale": "ru_RU",
+    },
+    "sheets": [
+        {
+            "properties": {
+                "sheetType": "GRID",
+                "sheetId": 0,
+                "title": "Лист1",
+                "gridProperties": {
+                    "rowCount": REPORT_ROW_COUNT,
+                    "columnCount": REPORT_COLUMN_COUNT,
+                },
+            }
+        }
+    ],
+}
 
 
 async def spreadsheets_create(wrapper_services: Aiogoogle) -> str:
@@ -17,26 +36,9 @@ async def spreadsheets_create(wrapper_services: Aiogoogle) -> str:
     Возвращает id документа.
     """
     now_date_time = datetime.now().strftime(FORMAT)
+    spreadsheet_body = SPREADSHEET_BODY.copy()
+    spreadsheet_body["properties"]["title"] %= now_date_time
     service = await wrapper_services.discover("sheets", "v4")
-    spreadsheet_body = {
-        "properties": {
-            "title": f"QRKot. Отчет от {now_date_time}",
-            "locale": "ru_RU",
-        },
-        "sheets": [
-            {
-                "properties": {
-                    "sheetType": "GRID",
-                    "sheetId": 0,
-                    "title": "Лист1",
-                    "gridProperties": {
-                        "rowCount": REPORT_ROW_COUNT,
-                        "columnCount": REPORT_COLUMN_COUNT,
-                    },
-                }
-            }
-        ],
-    }
     response = await wrapper_services.as_service_account(
         service.spreadsheets.create(json=spreadsheet_body)
     )
@@ -76,7 +78,6 @@ async def spreadsheets_update_value(
         ["Название проекта", "Время сбора", "Описание"],
     ]
     for project_and_completion_rate in closed_projects:
-        print(project_and_completion_rate)
         project, completion_rate = project_and_completion_rate
         completion_rate = timedelta(seconds=completion_rate)
         new_row = [
